@@ -1,7 +1,6 @@
 # Каждый логический набор тестов — это класс, 
 # который наследуется от базового класса TestCase
 from http import HTTPStatus
-from urllib import response
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from posts.models import Post, Group
@@ -18,7 +17,7 @@ class StaticURLTests(TestCase):
     def test_homepage(self):
         # Отправляем запрос через client,
         # созданный в setUp()
-        response = self.guest_client.get('/')  
+        response = self.guest_client.get('/')
         self.assertEqual(response.status_code, 200)
 
 
@@ -45,6 +44,7 @@ class PostsURLTests(TestCase):
         cls.post_author = User.objects.create_user(username='Post_author')
         cls.post_author_client = Client()
         cls.post_author_client.force_login(cls.post_author)
+
     def setUp(self) -> None:
         # Объявляем гостевой клиент
         self.guest_client = PostsURLTests.guest_client
@@ -57,33 +57,32 @@ class PostsURLTests(TestCase):
         # Авторизуем автора поста
         self.post_author_client = PostsURLTests.post_author
 
-        
-    
+
     def test_urls_status_code(self):
-        """Проверка общедоступных страниц""" 
+        """Проверка общедоступных страниц"""
         url_names = [
             '/',
             '/group/test-slug/',
             f'/profile/{self.user}/',
             f'/posts/{self.post.id}/',
         ]
-        for  urls in url_names:
+        for urls in url_names:
             with self.subTest(urls):
                 response = self.authorized_client.get(urls)
-                self.assertEqual(response.status_code, HTTPStatus.OK)  
-    
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+
     def test_url_avaliable_to_authorized(self):
         """Проверка доступности страниц авторизованным пользователям"""
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
     def test_urls_code_404_aut(self):
         """Проверка, что несуществующая страница вернет ошибку 404"""
         response = self.authorized_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, 404)
-    
+
     def test_urls_uses_correct_template_guest_user(self):
-        """URL-адрес использует соответствующий 
+        """URL-адрес использует соответствующий
         шаблон для всех пользователей."""
         # Шаблоны по адресам
         templates_url_names = {
@@ -95,10 +94,10 @@ class PostsURLTests(TestCase):
         }
 
         for address, template in templates_url_names.items():
-            with self.subTest(address = address):
+            with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
-    
+
     def test_urls_edit_posts_author_user(self):
         """Проверка редактирования поста автором"""
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')

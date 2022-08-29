@@ -1,8 +1,6 @@
 from ..forms import PostForm
 from ..models import Post, Group
-from django.conf import settings
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
@@ -25,7 +23,7 @@ class TaskCreateFormTests(TestCase):
         cls.form = PostForm()
 
     def setUp(self):
-        
+
         self.auth_client = Client()
         self.auth_client.force_login(self.user)
 
@@ -45,7 +43,8 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         # Проверяем, сработал ли редирект
-        self.assertRedirects(response, reverse('posts:profile', kwargs={'username': TaskCreateFormTests.user.username}))
+        self.assertRedirects(response, reverse('posts:profile', 
+            kwargs={'username': TaskCreateFormTests.user.username}))
         # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), tasks_count + 1)
         # Проверяем, что создалась запись с заданным слагом
