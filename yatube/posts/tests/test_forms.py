@@ -43,8 +43,8 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         # Проверяем, сработал ли редирект
-        self.assertRedirects(response, reverse('posts:profile', 
-                kwargs={'username': TaskCreateFormTests.user.username}))
+        self.assertRedirects(response, reverse('posts:profile',
+                    kwargs={'username': TaskCreateFormTests.user.username}))
         # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), tasks_count + 1)
         # Проверяем, что создалась запись с заданным слагом
