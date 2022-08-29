@@ -1,4 +1,4 @@
-# Каждый логический набор тестов — это класс, 
+# Каждый логический набор тестов — это класс,
 # который наследуется от базового класса TestCase
 from http import HTTPStatus
 from django.test import TestCase, Client
@@ -57,7 +57,6 @@ class PostsURLTests(TestCase):
         # Авторизуем автора поста
         self.post_author_client = PostsURLTests.post_author
 
-
     def test_urls_status_code(self):
         """Проверка общедоступных страниц"""
         url_names = [
@@ -101,4 +100,4 @@ class PostsURLTests(TestCase):
     def test_urls_edit_posts_author_user(self):
         """Проверка редактирования поста автором"""
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.OK) 
+        self.assertEqual(response.status_code, HTTPStatus.OK)
