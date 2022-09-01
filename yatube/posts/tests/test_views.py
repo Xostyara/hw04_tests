@@ -6,6 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from posts.models import Group, Post
 from ..forms import PostForm
+from django.core.cache import cache
 
 User = get_user_model()
 
@@ -40,17 +41,24 @@ class PostsViewsTest(TestCase):
         # cls.client.force_login(cls.user)
 
     def setUp(self):
+        """Не забываем перед каждым тестом чистить кэш"""
+        cache.clear()
         self.client = Client()
         self.client.force_login(self.user)
 
-    def check_page_obj_at_context(self, response):
+    def check_context_contains_page_or_post(self, context, post=False):
         """Эта функция является частью простого контекстного тестирования.
         Она создана для того, что бы не создавать повторяющиеся конструкции"""
-        first_object_post = response.context.get("page_obj")[0]
-
-        self.assertEqual(first_object_post.author.username, "TestUser")
-        self.assertEqual(first_object_post.text, "test test")
-        self.assertEqual(first_object_post.group.title, "Тестовое название")
+        if post:
+            self.assertIn('post', context)
+            post = context['post']
+        else:
+            self.assertIn('page', context)
+            post = context['page'][0]
+        self.assertEqual(post.author, PostsViewsTest.user)
+        self.assertEqual(post.pub_date, PostsViewsTest.post.pub_date)
+        self.assertEqual(post.text, PostsViewsTest.post.text)
+        self.assertEqual(post.group, PostsViewsTest.post.group) 
 
     def test_view_funcs_correct_templates(self):
         """Проверка на использование корректного шаблона"""
@@ -87,9 +95,40 @@ class PostsViewsTest(TestCase):
     def test_index_correct_context(self):
         response = self.client.get(reverse("posts:index"))
 
-        self.check_page_obj_at_context(response)
+        self.check_context_contains_page_or_post('post', response)
 
-    def test_post_create_correct_context(self):
+    def test_group_posts_correct_context(self):
+        response = self.client.get(
+
+            reverse( 
+
+                "posts:group_list", 
+
+                kwargs={"slug": self.group.slug} 
+
+            ) 
+
+        ) 
+
+        self.check_context_contains_page_or_post(response.context)
+
+        self.assertIn('group', response.context)
+        group = response.context['group']
+        self.assertEqual(group.title, PostsViewsTest.group.title)
+        self.assertEqual(group.description, PostsViewsTest.group.description)
+
+    def test_post_detail_correct_context(self):
+        response = self.client.get(
+            reverse(
+                "posts:post_detail",
+                kwargs={"post_id": self.test_post.id}
+            )
+        )
+        self.check_context_contains_page_or_post(response.context, post=True)
+        self.assertIn('author', response.context)
+        self.assertEqual(response.context['author'], PostsViewsTest.user) 
+
+    def test_post_edit_correct_context(self):
         response = self.client.get(reverse("posts:post_create"))
         form_obj = response.context.get("form")
         form_field_types = {
@@ -100,67 +139,27 @@ class PostsViewsTest(TestCase):
             with self.subTest(field=field):
                 field_type = form_obj.fields.get(field)
 
-                self.assertIsInstance(field_type, expected_type)
+        self.assertIsInstance(field_type, expected_type)
         self.assertIsInstance(form_obj, PostForm)
-
-    def test_group_posts_correct_context(self):
-        response = self.client.get(
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": self.group.slug}
-            )
-        )
-        group_obj = response.context.get("group")
-
-        self.assertEqual(group_obj, Group.objects.get(id=1))
-        self.check_page_obj_at_context(response)
-
-    def test_post_detail_correct_context(self):
-        response = self.client.get(
-            reverse(
-                "posts:post_detail",
-                kwargs={"post_id": self.test_post.id}
-            )
-        )
-        post_obj = response.context.get("post")
-        self.assertEqual(post_obj, self.test_post)
-
-    def test_post_edit_correct_context(self):
-        response = self.client.get(
-            reverse(
-                "posts:post_edit",
-                kwargs={"post_id": self.test_post.id}
-            )
-        )
-        post_obj = response.context.get("post")
         is_edit_flag = response.context.get("is_edit")
-        form_obj = response.context.get("form")
-
-        form_group = form_obj["group"].__getitem__(1).choice_label
-        form_text = form_obj["text"].value()
-        expected_fields = {
-            "group": "Тестовое название",
-            "text": "test test",
-        }
-
-        self.assertEqual(post_obj, self.test_post)
-        self.assertEqual(is_edit_flag, True)
-
-        self.assertIsInstance(form_obj, PostForm)
-        self.assertEqual(form_group, expected_fields.get("group"))
-        self.assertEqual(form_text, expected_fields.get("text"))
+        
+        self.assertEqual(is_edit_flag, False)
 
     def test_profile_use_correct_context(self):
-        response = self.client.get(
-            reverse(
-                "posts:profile",
-                kwargs={"username": self.user.username}
-            )
-        )
-        # user_obj = response.context.get("username")
+        response = self.client.get( 
 
-        # self.assertEqual(user_obj, self.user)
-        self.check_page_obj_at_context(response)
+            reverse( 
+
+                "posts:profile", 
+
+                kwargs={"username": self.user.username} 
+
+            ) 
+
+        ) 
+        self.check_context_contains_page_or_post(response)
+        self.assertIn('author', response.context)
+        self.assertEqual(response.context['author'], PostsViewsTest.user)
 
     def test_post_created_at_right_group_and_profile(self):
         """Тестовый пост создан не в той группе и профиле"""

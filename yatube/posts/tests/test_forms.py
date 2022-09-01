@@ -3,6 +3,7 @@ from ..models import Post, Group
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from http import HTTPStatus
 
 User = get_user_model()
 
@@ -16,28 +17,41 @@ class TaskCreateFormTests(TestCase):
         cls.group = Group.objects.create(title='Тестовая группа',
                                          slug='test_slug',
                                          description='Тестовое описание')
-        cls.post = Post.objects.create(text='Первый пост', group=cls.group,
-                                       author=cls.user)
+        # в этом методе создаем только группу
+        # cls.post = Post.objects.create(text='Первый пост', group=cls.group,
+        #                                author=cls.user)
 
         # Создаем форму, если нужна проверка атрибутов
         cls.form = PostForm()
 
     def setUp(self):
 
-        self.auth_client = Client()
-        self.auth_client.force_login(self.user)
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
 
     def test_create_task(self):
         """Валидная форма создает запись в Post."""
-        # Подсчитаем количество записей в Post
-        tasks_count = Post.objects.count()
+        # Создаем первый пост и проверяем статус запроса
+        response = self.authorized_client.post(
+                        reverse('posts:profile',
+                kwargs={
+                    'username': TaskCreateFormTests.user.username
+                }),        
+            data={'text': 'Test post', 'group': TaskCreateFormTests.group.id},
+            follow=True
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        
+
+
         form_data = {
-            'text': 'Первый пост',
-            'group': TaskCreateFormTests.group.pk,
+            'text': 'Test post',
+            'group': TaskCreateFormTests.group.id,
             'author': TaskCreateFormTests.user
         }
         # Отправляем POST-запрос
-        response = self.auth_client.post(
+        response = self.authorized_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
@@ -51,11 +65,23 @@ class TaskCreateFormTests(TestCase):
                 }
             )
         )
-        # Проверяем, увеличилось ли число постов
-        self.assertEqual(Post.objects.count(), tasks_count + 1)
+
         # Проверяем, что создалась запись с заданным слагом
         self.assertTrue(
             Post.objects.filter(
-                text='Первый пост'
+                text='Test post'
             ).exists()
         )
+        # Получаем пост и проверяем все его проперти
+        post = Post.objects.first()
+        self.assertEqual(post.text, 'Test post')
+        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.group, TaskCreateFormTests.group) 
+        
+        # Подсчитаем количество записей в Post
+        self.assertEqual(Post.objects.count(), 1)
+
+        def test_auth_user_can_edit_his_post(self):
+            pass
+        def test_unauth_user_cant_publish_post(self):
+            pass

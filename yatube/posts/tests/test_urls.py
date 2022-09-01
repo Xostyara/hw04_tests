@@ -61,7 +61,7 @@ class PostsURLTests(TestCase):
         """Проверка общедоступных страниц"""
         url_names = [
             '/',
-            '/group/test-slug/',
+            f'/group/{self.group.slug}/',
             f'/profile/{self.user}/',
             f'/posts/{self.post.id}/',
         ]
@@ -78,7 +78,7 @@ class PostsURLTests(TestCase):
     def test_urls_code_404_aut(self):
         """Проверка, что несуществующая страница вернет ошибку 404"""
         response = self.authorized_client.get('/unexisting_page/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_urls_uses_correct_template_guest_user(self):
         """URL-адрес использует соответствующий

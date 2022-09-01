@@ -17,7 +17,10 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(validators=[validate_not_empty])
+    text = models.TextField(
+        validators=[validate_not_empty],
+        verbose_name='Текст',
+        )
     pub_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
         User,
