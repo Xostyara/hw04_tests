@@ -45,7 +45,9 @@ class PostsViewsTest(TestCase):
         """Не забываем перед каждым тестом чистить кэш"""
         cache.clear()
         self.client = Client()
-        self.client.force_login(self.user)
+        self.auth_client = Client()
+        self.user = PostsViewsTest.user
+        self.auth_client.force_login(self.user)
         self.post = PostsViewsTest.post
 
     def check_context_contains_page_or_post(self, context, post=False):
@@ -90,25 +92,19 @@ class PostsViewsTest(TestCase):
         }
         for url, template in names_templates.items():
             with self.subTest(url=url):
-                response = self.client.get(url)
-
+                response = self.auth_client.get(url)
                 self.assertTemplateUsed(response, template)
 
     def test_index_correct_context(self):
-        response = self.client.get(reverse("posts:index")) 
+        response = self.auth_client.get(reverse("posts:index")) 
         self.check_context_contains_page_or_post(response.context) 
 
     def test_group_posts_correct_context(self):
-        response = self.client.get(
-
+        response = self.auth_client.get(
             reverse( 
-
                 "posts:group_list", 
-
                 kwargs={"slug": self.group.slug} 
-
             ) 
-
         ) 
 
         self.check_context_contains_page_or_post(response.context)
@@ -119,7 +115,7 @@ class PostsViewsTest(TestCase):
         self.assertEqual(group.description, PostsViewsTest.group.description)
 
     def test_post_detail_correct_context(self):
-        response = self.client.get(
+        response = self.auth_client.get(
             reverse(
                 "posts:post_detail",
                 kwargs={"post_id": self.post.id}
@@ -130,7 +126,7 @@ class PostsViewsTest(TestCase):
         self.assertEqual(response.context['user'], PostsViewsTest.user) 
 
     def test_post_edit_correct_context(self):
-        response = self.client.get(reverse("posts:post_create"))
+        response = self.auth_client.get(reverse("posts:post_create"))
         form_obj = response.context.get("form")
         form_field_types = {
             "group": forms.fields.ChoiceField,
@@ -147,7 +143,7 @@ class PostsViewsTest(TestCase):
         self.assertEqual(is_edit_flag, False)
 
     def test_profile_use_correct_context(self):
-        response = self.client.get( 
+        response = self.auth_client.get( 
 
             reverse( 
 
@@ -158,9 +154,7 @@ class PostsViewsTest(TestCase):
             ) 
 
         ) 
-
-        self.assertIn('user', response.context)
-        self.assertEqual(response.context['user'], PostsViewsTest.user)
+        self.check_context_contains_page_or_post(response.context)
 
     def test_post_created_at_right_group_and_profile(self):
         """Тестовый пост создан не в той группе и профиле"""
@@ -176,7 +170,7 @@ class PostsViewsTest(TestCase):
         )
         for url in urls:
             with self.subTest(url=url):
-                response = self.client.get(url)
+                response = self.auth_client.get(url)
                 page_obj = response.context.get("page_obj")
 
                 self.assertEqual(len(page_obj), 0)
