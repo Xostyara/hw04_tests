@@ -99,5 +99,5 @@ class PostsURLTests(TestCase):
 
     def test_urls_edit_posts_author_user(self):
         """Проверка редактирования поста автором"""
-        response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
+        response = self.authorized_client.get(f'/posts/{self.post.pk}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.OK)

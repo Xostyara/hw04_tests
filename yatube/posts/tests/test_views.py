@@ -32,11 +32,12 @@ class PostsViewsTest(TestCase):
             slug="test-slug-group-2",
             title="Тестовое название второй группы"
         )
-        cls.test_post = Post.objects.create(
+        cls.post = Post.objects.create(
             author=cls.user,
             text="test test",
             group=cls.group
         )
+
         # cls.client = Client()
         # cls.client.force_login(cls.user)
 
@@ -45,6 +46,7 @@ class PostsViewsTest(TestCase):
         cache.clear()
         self.client = Client()
         self.client.force_login(self.user)
+        self.post = PostsViewsTest.post
 
     def check_context_contains_page_or_post(self, context, post=False):
         """Эта функция является частью простого контекстного тестирования.
@@ -53,8 +55,8 @@ class PostsViewsTest(TestCase):
             self.assertIn('post', context)
             post = context['post']
         else:
-            self.assertIn('page', context)
-            post = context['page'][0]
+            self.assertIn('page_obj', context)
+            post = context['page_obj'][0]
         self.assertEqual(post.author, PostsViewsTest.user)
         self.assertEqual(post.pub_date, PostsViewsTest.post.pub_date)
         self.assertEqual(post.text, PostsViewsTest.post.text)
@@ -75,11 +77,11 @@ class PostsViewsTest(TestCase):
             ): "posts/group_list.html",
             reverse(
                 "posts:post_detail",
-                kwargs={"post_id": self.test_post.id}
+                kwargs={"post_id": self.post.id}
             ): "posts/post_detail.html",
             reverse(
                 "posts:post_edit",
-                kwargs={"post_id": self.test_post.id}
+                kwargs={"post_id": self.post.id}
             ): "posts/create_post.html",
             reverse(
                 "posts:profile",
@@ -93,9 +95,8 @@ class PostsViewsTest(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_index_correct_context(self):
-        response = self.client.get(reverse("posts:index"))
-
-        self.check_context_contains_page_or_post('post', response)
+        response = self.client.get(reverse("posts:index")) 
+        self.check_context_contains_page_or_post(response.context) 
 
     def test_group_posts_correct_context(self):
         response = self.client.get(
@@ -121,12 +122,12 @@ class PostsViewsTest(TestCase):
         response = self.client.get(
             reverse(
                 "posts:post_detail",
-                kwargs={"post_id": self.test_post.id}
+                kwargs={"post_id": self.post.id}
             )
         )
         self.check_context_contains_page_or_post(response.context, post=True)
-        self.assertIn('author', response.context)
-        self.assertEqual(response.context['author'], PostsViewsTest.user) 
+        self.assertIn('user', response.context)
+        self.assertEqual(response.context['user'], PostsViewsTest.user) 
 
     def test_post_edit_correct_context(self):
         response = self.client.get(reverse("posts:post_create"))
@@ -157,9 +158,9 @@ class PostsViewsTest(TestCase):
             ) 
 
         ) 
-        self.check_context_contains_page_or_post(response)
-        self.assertIn('author', response.context)
-        self.assertEqual(response.context['author'], PostsViewsTest.user)
+
+        self.assertIn('user', response.context)
+        self.assertEqual(response.context['user'], PostsViewsTest.user)
 
     def test_post_created_at_right_group_and_profile(self):
         """Тестовый пост создан не в той группе и профиле"""

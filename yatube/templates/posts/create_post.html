@@ -21,7 +21,7 @@
               <div class="card-body">        
                 <form method="post"
                   {% if is_edit %}
-                    action="{% url 'posts:post_edit' post_id=post.pk %}"
+                    action="{% url 'posts:post_edit' post_id=test_post.pk %}"
                   {% else %}
                     action="{% url 'posts:post_create' %}"
                   {% endif %}
