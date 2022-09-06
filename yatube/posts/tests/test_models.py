@@ -20,7 +20,8 @@ class PostModelTest(TestCase):
             author=cls.user,
             text='Текст',
         )
-    def test_verbose_name(self):    
+
+    def test_verbose_name(self):
         post = PostModelTest.post
         field_verboses = {
             'text': 'Текст',
@@ -31,7 +32,7 @@ class PostModelTest(TestCase):
             with self.subTest(value=value):
                 self.assertEqual(
                     post._meta.get_field(value).verbose_name, expected)
-                    
+     
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
 

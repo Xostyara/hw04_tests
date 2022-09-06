@@ -1,5 +1,4 @@
-from django.shortcuts import render, get_object_or_404 
-
+from django.shortcuts import render, get_object_or_404
 from .models import Post, Group, User
 from django.shortcuts import render, redirect
 from .forms import PostForm
@@ -7,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .utils import paginate_page
 
 # Create your views here.
+
 
 # Главная страница
 def index(request):
@@ -21,8 +21,9 @@ def index(request):
         'page_obj': page_obj,
     }
     return render(request, 'posts/index.html', context)
- 
-# Страница с постами группы 
+
+
+# Страница с постами группы
 def group_posts(request, slug):
 
     template = 'posts/group_list.html'
@@ -44,7 +45,8 @@ def group_posts(request, slug):
     }
     return render(request, template, context)
 
-# Профиль пользователя 
+
+# Профиль пользователя
 def profile(request, username):
 
     template = 'posts/profile.html'
@@ -62,7 +64,8 @@ def profile(request, username):
     }
     return render(request, template, context)
 
-# Посты пользователя 
+
+# Посты пользователя
 def post_detail(request, post_id):
 
     template = 'posts/post_detail.html'
@@ -72,8 +75,8 @@ def post_detail(request, post_id):
     }
     return render(request, template, context)
 
-# @login_required 
-# def post_create(request): 
+# @login_required
+# def post_create(request):
 #     if request.method == 'POST':
 #         form = PostForm(request.POST or None)
 #         if form.is_valid():
@@ -83,6 +86,7 @@ def post_detail(request, post_id):
 #             return redirect('posts:profile', post.author)
 #     form = PostForm()
 #     return render(request, 'posts/create_post.html', {'form': form})
+
 
 @login_required
 def post_create(request):
@@ -106,27 +110,20 @@ def post_create(request):
     post.author = request.user
     post.save()
     return redirect("posts:profile", request.user)
- 
+
+
 @login_required
 def post_edit(request, post_id):
-
     post = get_object_or_404(Post, pk=post_id)
-
     if post.author != request.user:
-
         return redirect('posts:post_detail', post_id)
-
     form = PostForm(request.POST or None, instance=post)
-
     if form.is_valid():
-
         form.save()
         return redirect("posts:post_detail", post_id)
-
     context = {
         "form": form,
         "post": post,
         "is_edit": True,
     }
-
     return render(request, 'posts/create_post.html', context)

@@ -34,16 +34,16 @@ class TaskCreateFormTests(TestCase):
         """Валидная форма создает запись в Post."""
         # Создаем первый пост и проверяем статус запроса
         response = self.authorized_client.post(
-                        reverse('posts:profile',
-                kwargs={
+                reverse('posts:profile',
+                    kwargs={
                     'username': TaskCreateFormTests.user.username
-                }),        
-            data={'text': 'Test post', 'group': TaskCreateFormTests.group.id},
-            follow=True
+                }),
+                data={'text': 'Test post', 'group': TaskCreateFormTests.group.id},
+                follow=True
         )
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        
+
         form_data = {
             'text': 'Test post',
             'group': TaskCreateFormTests.group.id,
@@ -75,13 +75,11 @@ class TaskCreateFormTests(TestCase):
         post = Post.objects.first()
         self.assertEqual(post.text, 'Test post')
         self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group, TaskCreateFormTests.group) 
-        
-        
+        self.assertEqual(post.group, TaskCreateFormTests.group)
         self.assertEqual(Post.objects.count(), 1)
 
         # def test_auth_user_can_edit_his_post(self):
-            # pass
+        # pass
 
     def test_authorized_user_edit_post(self):
         # проверка редактирования записи авторизованным пользователем
@@ -123,6 +121,8 @@ class TaskCreateFormTests(TestCase):
             follow=True
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        redirect = reverse('login') + '?next=/create/'  + reverse('posts:post_create')
-        self.assertRedirects(response, ('/auth/login/?next=/create/'))
+        self.assertRedirects(
+            response,
+            ('/auth/login/?next=/create/')
+        )
         self.assertEqual(Post.objects.count(), posts_count)
