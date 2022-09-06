@@ -11,7 +11,7 @@
         <div class="row justify-content-center">
           <div class="col-md-8 p-5">
             <div class="card">
-              <div class="card-header"> 
+              <div class="card-header">
                 {% if is_edit %}
                 Редактирование поста
                 {% else %}
@@ -21,7 +21,7 @@
               <div class="card-body">        
                 <form method="post"
                   {% if is_edit %}
-                    action="{% url 'posts:post_edit' post_id=test_post.pk %}"
+                    action="{% url 'posts:post_edit' post_id=post.pk %}"
                   {% else %}
                     action="{% url 'posts:post_create' %}"
                   {% endif %}

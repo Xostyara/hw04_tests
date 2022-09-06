@@ -66,6 +66,7 @@ class PostsViewsTest(TestCase):
 
     def test_view_funcs_correct_templates(self):
         """Проверка на использование корректного шаблона"""
+
         names_templates = {
             reverse(
                 "posts:index"

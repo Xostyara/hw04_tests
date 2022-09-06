@@ -25,7 +25,8 @@ class TaskCreateFormTests(TestCase):
         cls.form = PostForm()
 
     def setUp(self):
-
+        self.guest_client = Client()
+        self.user = TaskCreateFormTests.user
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -43,8 +44,6 @@ class TaskCreateFormTests(TestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         
-
-
         form_data = {
             'text': 'Test post',
             'group': TaskCreateFormTests.group.id,
@@ -78,10 +77,52 @@ class TaskCreateFormTests(TestCase):
         self.assertEqual(post.author, self.user)
         self.assertEqual(post.group, TaskCreateFormTests.group) 
         
-        # Подсчитаем количество записей в Post
+        
         self.assertEqual(Post.objects.count(), 1)
 
-        def test_auth_user_can_edit_his_post(self):
-            pass
-        def test_unauth_user_cant_publish_post(self):
-            pass
+        # def test_auth_user_can_edit_his_post(self):
+            # pass
+
+    def test_authorized_user_edit_post(self):
+        # проверка редактирования записи авторизованным пользователем
+        post = Post.objects.create(
+            text='post_text',
+            author=self.user
+        )
+        form_data = {
+            'text': 'post_text_edit',
+            'group': self.group.id
+        }
+        response = self.authorized_client.post(
+            reverse(
+                'posts:post_edit',
+                args=[post.id]),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            reverse('posts:post_detail', kwargs={'post_id': post.id})
+        )
+        post_one = Post.objects.latest('id')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(post_one.text, form_data['text'])
+        self.assertEqual(post_one.author, self.user)
+        self.assertEqual(post_one.group.id, form_data['group'])
+
+    def test_nonauthorized_user_create_post(self):
+        # проверка создания записи не авторизованным пользователем
+        posts_count = Post.objects.count()
+        form_data = {
+            'text': 'non_auth_edit_text',
+            'group': self.group.id
+        }
+        response = self.guest_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        redirect = reverse('login') + '?next=/create/'  + reverse('posts:post_create')
+        self.assertRedirects(response, ('/auth/login/?next=/create/'))
+        self.assertEqual(Post.objects.count(), posts_count)
