@@ -38,7 +38,7 @@ class TaskCreateFormTests(TestCase):
                     kwargs={
                         'username': TaskCreateFormTests.user.username
                     }
-            ),
+                ),
             data={
                 'text': 'Test post',
                 'group': TaskCreateFormTests.group.id
