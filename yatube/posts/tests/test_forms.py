@@ -34,16 +34,16 @@ class TaskCreateFormTests(TestCase):
         """Валидная форма создает запись в Post."""
         # Создаем первый пост и проверяем статус запроса
         response = self.authorized_client.post(
-                reverse('posts:profile',
-                    kwargs={
-                        'username': TaskCreateFormTests.user.username
-                    }
-                ),
-                data={
-                    'text': 'Test post',
-                    'group': TaskCreateFormTests.group.id
-                },
-                follow=True
+            reverse('posts:profile',
+                kwargs={
+                    'username': TaskCreateFormTests.user.username
+                }
+            ),
+            data={
+                'text': 'Test post',
+                'group': TaskCreateFormTests.group.id
+            },
+            follow=True
         )
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
