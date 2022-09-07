@@ -35,8 +35,8 @@ class TaskCreateFormTests(TestCase):
         # Создаем первый пост и проверяем статус запроса
         response = self.authorized_client.post(
             reverse('posts:profile',
-                kwargs={
-                    'username': TaskCreateFormTests.user.username
+                    kwargs={
+                        'username': TaskCreateFormTests.user.username
                 }
             ),
             data={
