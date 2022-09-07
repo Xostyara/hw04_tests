@@ -62,7 +62,7 @@ class PostsViewsTest(TestCase):
         self.assertEqual(post.author, PostsViewsTest.user)
         self.assertEqual(post.pub_date, PostsViewsTest.post.pub_date)
         self.assertEqual(post.text, PostsViewsTest.post.text)
-        self.assertEqual(post.group, PostsViewsTest.post.group) 
+        self.assertEqual(post.group, PostsViewsTest.post.group)
 
     def test_view_funcs_correct_templates(self):
         """Проверка на использование корректного шаблона"""
@@ -97,19 +97,18 @@ class PostsViewsTest(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_index_correct_context(self):
-        response = self.auth_client.get(reverse("posts:index")) 
-        self.check_context_contains_page_or_post(response.context) 
+        response = self.auth_client.get(reverse("posts:index"))
+        self.check_context_contains_page_or_post(response.context)
 
     def test_group_posts_correct_context(self):
         response = self.auth_client.get(
-            reverse( 
-                "posts:group_list", 
-                kwargs={"slug": self.group.slug} 
-            ) 
-        ) 
+            reverse(
+                "posts:group_list",
+                kwargs={"slug": self.group.slug}
+            )
+        )
 
         self.check_context_contains_page_or_post(response.context)
-
         self.assertIn('group', response.context)
         group = response.context['group']
         self.assertEqual(group.title, PostsViewsTest.group.title)
@@ -124,7 +123,7 @@ class PostsViewsTest(TestCase):
         )
         self.check_context_contains_page_or_post(response.context, post=True)
         self.assertIn('user', response.context)
-        self.assertEqual(response.context['user'], PostsViewsTest.user) 
+        self.assertEqual(response.context['user'], PostsViewsTest.user)
 
     def test_post_edit_correct_context(self):
         response = self.auth_client.get(reverse("posts:post_create"))
@@ -140,21 +139,15 @@ class PostsViewsTest(TestCase):
         self.assertIsInstance(field_type, expected_type)
         self.assertIsInstance(form_obj, PostForm)
         is_edit_flag = response.context.get("is_edit")
-        
         self.assertEqual(is_edit_flag, False)
 
     def test_profile_use_correct_context(self):
-        response = self.auth_client.get( 
-
-            reverse( 
-
-                "posts:profile", 
-
-                kwargs={"username": self.user.username} 
-
-            ) 
-
-        ) 
+        response = self.auth_client.get(
+            reverse(
+                "posts:profile",
+                kwargs={"username": self.user.username}
+            )
+        )
         self.check_context_contains_page_or_post(response.context)
 
     def test_post_created_at_right_group_and_profile(self):

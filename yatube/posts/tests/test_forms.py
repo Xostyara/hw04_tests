@@ -36,9 +36,13 @@ class TaskCreateFormTests(TestCase):
         response = self.authorized_client.post(
                 reverse('posts:profile',
                     kwargs={
-                    'username': TaskCreateFormTests.user.username
-                }),
-                data={'text': 'Test post', 'group': TaskCreateFormTests.group.id},
+                        'username': TaskCreateFormTests.user.username
+                    }
+                ),
+                data={
+                    'text': 'Test post',
+                    'group': TaskCreateFormTests.group.id
+                },
                 follow=True
         )
 
