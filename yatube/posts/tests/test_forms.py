@@ -37,8 +37,7 @@ class TaskCreateFormTests(TestCase):
             reverse('posts:profile',
                     kwargs={
                         'username': TaskCreateFormTests.user.username
-                    }
-        ),
+                    }),
             data={
                 'text': 'Test post',
                 'group': TaskCreateFormTests.group.id
