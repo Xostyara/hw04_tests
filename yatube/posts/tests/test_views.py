@@ -230,7 +230,7 @@ class PaginatorViewsTest(TestCase):
                         expected_count
                     )
 
-        # # Второй вариант цикла            
+        # # Второй вариант цикла
         # for url in urls:
         #     with self.subTest(url=url):
         #         for page in (1, 2):
