@@ -99,7 +99,7 @@ class TaskCreateFormTests(TestCase):
             response,
             reverse('posts:post_detail', kwargs={'post_id': post.id})
         )
-        post = Post.objects.first() 
+        post = Post.objects.first()
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.author, self.user)
@@ -107,7 +107,6 @@ class TaskCreateFormTests(TestCase):
 
     def test_nonauthorized_user_create_post(self):
         # проверка создания записи не авторизованным пользователем
-        posts_count = Post.objects.count()
         form_data = {
             'text': 'non_auth_edit_text',
             'group': self.group.id
@@ -122,5 +121,5 @@ class TaskCreateFormTests(TestCase):
             response,
             ('/auth/login/?next=/create/')
         )
-        count_0=0
-        self.assertEqual(Post.objects.count(), count_0) # posts_count)
+        count_0 = 0
+        self.assertEqual(Post.objects.count(), count_0)

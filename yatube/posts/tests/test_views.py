@@ -1,5 +1,3 @@
-from time import sleep
-from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -128,8 +126,9 @@ class PostsViewsTest(TestCase):
     def test_post_edit_correct_context(self):
         response = self.auth_client.get(reverse("posts:post_create"))
         response_1 = self.auth_client.get(
-            reverse("posts:post_edit",
-                    kwargs={"post_id": self.post.id}
+            reverse(
+                "posts:post_edit",
+                kwargs={"post_id": self.post.id}
             )
         )
         form_obj = response.context.get("form")
@@ -197,7 +196,7 @@ class PaginatorViewsTest(TestCase):
                 group=cls.group
             ) for num in range(1, 14)
         ]
-        Post.objects.bulk_create(posts) 
+        Post.objects.bulk_create(posts)
 
         cls.client = Client()
 
@@ -225,13 +224,13 @@ class PaginatorViewsTest(TestCase):
                 for page, expected_count in pages:
                     response = self.client.get(f"{url}?page={page}")
                     page_obj = response.context.get("page_obj")
-        
-                    self.assertEqual( 
-                        len(page_obj), 
+
+                    self.assertEqual(
+                        len(page_obj),
                         expected_count
                     )
 
-        # # Второй вариант цикла               
+        # # Второй вариант цикла            
         # for url in urls:
         #     with self.subTest(url=url):
         #         for page in (1, 2):
