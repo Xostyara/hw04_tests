@@ -68,12 +68,6 @@ class TaskCreateFormTests(TestCase):
             )
         )
 
-        # Проверяем, что создалась запись с заданным слагом
-        self.assertTrue(
-            Post.objects.filter(
-                text='Test post'
-            ).exists()
-        )
         # Получаем пост и проверяем все его проперти
         post = Post.objects.first()
         self.assertEqual(post.text, 'Test post')
@@ -105,11 +99,11 @@ class TaskCreateFormTests(TestCase):
             response,
             reverse('posts:post_detail', kwargs={'post_id': post.id})
         )
-        post_one = Post.objects.latest('id')
+        post = Post.objects.first() 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(post_one.text, form_data['text'])
-        self.assertEqual(post_one.author, self.user)
-        self.assertEqual(post_one.group.id, form_data['group'])
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.group.id, form_data['group'])
 
     def test_nonauthorized_user_create_post(self):
         # проверка создания записи не авторизованным пользователем
@@ -128,4 +122,5 @@ class TaskCreateFormTests(TestCase):
             response,
             ('/auth/login/?next=/create/')
         )
-        self.assertEqual(Post.objects.count(), posts_count)
+        count_0=0
+        self.assertEqual(Post.objects.count(), count_0) # posts_count)

@@ -127,19 +127,27 @@ class PostsViewsTest(TestCase):
 
     def test_post_edit_correct_context(self):
         response = self.auth_client.get(reverse("posts:post_create"))
+        response_1 = self.auth_client.get(
+            reverse("posts:post_edit",
+                    kwargs={"post_id": self.post.id}
+            )
+        )
         form_obj = response.context.get("form")
-        form_field_types = {
-            "group": forms.fields.ChoiceField,
-            "text": forms.fields.CharField,
-        }
-        for field, expected_type in form_field_types.items():
-            with self.subTest(field=field):
-                field_type = form_obj.fields.get(field)
+        # #Поля формы проверять не нужно
+        # # form_field_types = {
+        #     "group": forms.fields.ChoiceField,
+        #     "text": forms.fields.CharField,
+        # }
+        # for field, expected_type in form_field_types.items():
+        #     with self.subTest(field=field):
+        #         field_type = form_obj.fields.get(field)
 
-        self.assertIsInstance(field_type, expected_type)
+        # self.assertIsInstance(field_type, expected_type)
         self.assertIsInstance(form_obj, PostForm)
         is_edit_flag = response.context.get("is_edit")
+        is_edit_flag_1 = response_1.context.get("is_edit")
         self.assertEqual(is_edit_flag, False)
+        self.assertEqual(is_edit_flag_1, True)
 
     def test_profile_use_correct_context(self):
         response = self.auth_client.get(
@@ -183,14 +191,13 @@ class PaginatorViewsTest(TestCase):
             slug="test-slug",
             title="Тестовое название"
         )
-        for i in range(15, 0, -1):
-            Post.objects.create(
-                author=cls.user,
-                group=cls.group,
-                text=f"тестовый пост № {i}"
-            )
-            # задержка при создании
-            sleep(1E-6)
+        posts = [
+            Post(
+                text=f'text {num}', author=cls.user,
+                group=cls.group
+            ) for num in range(1, 14)
+        ]
+        Post.objects.bulk_create(posts) 
 
         cls.client = Client()
 
@@ -208,14 +215,31 @@ class PaginatorViewsTest(TestCase):
                 kwargs={"username": self.user.username}
             ),
         )
+        pages = [
+            (1, settings.POSTS_PER_PAGE),
+            (2, Post.objects.count() - settings.POSTS_PER_PAGE),
+        ]
         for url in urls:
             with self.subTest(url=url):
-                for page in (1, 2):
+
+                for page, expected_count in pages:
                     response = self.client.get(f"{url}?page={page}")
                     page_obj = response.context.get("page_obj")
-
-                    self.assertEqual(
-                        len(page_obj),
-                        settings.POSTS_PER_PAGE if page == 1 else
-                        Post.objects.count() - settings.POSTS_PER_PAGE
+        
+                    self.assertEqual( 
+                        len(page_obj), 
+                        expected_count
                     )
+
+        # # Второй вариант цикла               
+        # for url in urls:
+        #     with self.subTest(url=url):
+        #         for page in (1, 2):
+        #             response = self.client.get(f"{url}?page={page}")
+        #             page_obj = response.context.get("page_obj")
+
+        #             self.assertEqual(
+        #                 len(page_obj),
+        #                 settings.POSTS_PER_PAGE if page == 1 else
+        #                 Post.objects.count() - settings.POSTS_PER_PAGE
+        #             )

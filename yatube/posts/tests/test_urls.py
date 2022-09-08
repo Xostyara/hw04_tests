@@ -18,7 +18,7 @@ class StaticURLTests(TestCase):
         # Отправляем запрос через client,
         # созданный в setUp()
         response = self.guest_client.get('/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
 class PostsURLTests(TestCase):

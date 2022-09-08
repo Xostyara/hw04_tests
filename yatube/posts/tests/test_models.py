@@ -18,7 +18,7 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text='Текст',
+            text='Текст не самого длинного поста, больше 15 символов',
         )
 
     def test_verbose_name(self):
@@ -36,6 +36,10 @@ class PostModelTest(TestCase):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
 
-        task = PostModelTest.group
-        expected_object_name = task.title
-        self.assertEqual(expected_object_name, 'Тестовая группа')
+        post = PostModelTest.post
+        expected_object_name = post.text[:15]
+        self.assertEqual(str(post),expected_object_name)
+
+        
+
+
