@@ -39,6 +39,3 @@ class PostModelTest(TestCase):
         post = PostModelTest.post
         expected_object_name = post.text[:15]
         self.assertEqual(str(post), expected_object_name)
-        
-
-
