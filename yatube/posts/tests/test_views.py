@@ -124,15 +124,32 @@ class PostsViewsTest(TestCase):
         self.assertEqual(response.context['user'], PostsViewsTest.user)
 
     def test_post_edit_correct_context(self):
-        response = self.auth_client.get(reverse("posts:post_create"))
-        response_1 = self.auth_client.get(
-            reverse(
+        pages = {
+            "create": reverse("posts:post_create"),
+            "edit": reverse(
                 "posts:post_edit",
                 kwargs={"post_id": self.post.id}
-            )
-        )
-        form_obj = response.context.get("form")
-        # #Поля формы проверять не нужно
+                ) 
+        }
+        for name, url in pages.items():
+            response = self.auth_client.get(url)
+     
+            self.assertIn('form', response.context)
+            self.assertIsInstance(response.context['form'], PostForm)
+            self.assertIn('is_edit', response.context)
+            is_edit = response.context['is_edit']
+            self.assertIsInstance(is_edit, bool)
+            self.assertEqual(is_edit, name == "edit")
+
+        # response = self.auth_client.get(reverse("posts:post_create"))
+        # response_1 = self.auth_client.get(
+        #     reverse(
+        #         "posts:post_edit",
+        #         kwargs={"post_id": self.post.id}
+        #     )
+        # )
+        # form_obj = response.context.get("form")
+        # # Поля формы проверять не нужно
         # # form_field_types = {
         #     "group": forms.fields.ChoiceField,
         #     "text": forms.fields.CharField,
@@ -142,11 +159,11 @@ class PostsViewsTest(TestCase):
         #         field_type = form_obj.fields.get(field)
 
         # self.assertIsInstance(field_type, expected_type)
-        self.assertIsInstance(form_obj, PostForm)
-        is_edit_flag = response.context.get("is_edit")
-        is_edit_flag_1 = response_1.context.get("is_edit")
-        self.assertEqual(is_edit_flag, False)
-        self.assertEqual(is_edit_flag_1, True)
+        # self.assertIsInstance(form_obj, PostForm)
+        # is_edit_flag = response.context.get("is_edit")
+        # is_edit_flag_1 = response_1.context.get("is_edit")
+        # self.assertEqual(is_edit_flag, False)
+        # self.assertEqual(is_edit_flag_1, True)
 
     def test_profile_use_correct_context(self):
         response = self.auth_client.get(

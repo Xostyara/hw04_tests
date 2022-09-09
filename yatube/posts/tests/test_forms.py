@@ -121,5 +121,4 @@ class TaskCreateFormTests(TestCase):
             response,
             ('/auth/login/?next=/create/')
         )
-        count_0 = 0
-        self.assertEqual(Post.objects.count(), count_0)
+        self.assertEqual(Post.objects.count(), 0)
