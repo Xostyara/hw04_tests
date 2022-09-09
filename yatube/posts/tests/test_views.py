@@ -129,11 +129,11 @@ class PostsViewsTest(TestCase):
             "edit": reverse(
                 "posts:post_edit",
                 kwargs={"post_id": self.post.id}
-                ) 
+            )
         }
         for name, url in pages.items():
             response = self.auth_client.get(url)
-     
+
             self.assertIn('form', response.context)
             self.assertIsInstance(response.context['form'], PostForm)
             self.assertIn('is_edit', response.context)
